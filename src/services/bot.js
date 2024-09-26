@@ -22,42 +22,72 @@ async function mockApiCall(endpoint) {
     return [];
 }
 
-// Start command
-bot.start(async (ctx) => {
-    await ctx.reply("Welcome! Use the /menu command to see the options.");
-});
-
-// Function to display the main menu
+// Function to display the main menu (edit message)
 async function showMainMenu(ctx) {
     const webLink = Config.TELE_BOT_WEB_LINK;
 
-    await ctx.replyWithPhoto(
-        { url: 'https://www.broscams.io/header.png' }, // Header image URL
-        {
-            caption: "*BROSCAMS FORUM*\nSelect an option from the menu below:",
-            parse_mode: "Markdown", // Formatting replies with Markdown
-            reply_markup: {
-                inline_keyboard: [
-                    [
-                        { text: "ABOUT FORUM", callback_data: "about" },
-                        { text: "SUBSCRIPTIONS", callback_data: "subscriptions" },
-                    ],
-                    [
-                        { text: "CHANNELS", callback_data: "channels" },
-                        { text: "RECENT THREADS", callback_data: "recent" },
-                    ],
-                    [
-                        {
-                            text: "OPEN FORUM",
-                            web_app: {
-                                url: webLink,
-                            },
-                        },
-                    ],
-                ],
+    try {
+        // Use editMessageMedia to update the photo and caption
+        await ctx.editMessageMedia(
+            {
+                type: 'photo',
+                media: { url: 'https://www.broscams.io/header.png' }, // Header image URL
+                caption: "Select an option from the menu below:",
+                parse_mode: "Markdown",
             },
-        }
-    );
+            {
+                reply_markup: {
+                    inline_keyboard: [
+                        [
+                            { text: "ABOUT FORUM", callback_data: "about" },
+                            { text: "SUBSCRIPTIONS", callback_data: "subscriptions" },
+                        ],
+                        [
+                            { text: "CHANNELS", callback_data: "channels" },
+                            { text: "RECENT THREADS", callback_data: "recent" },
+                        ],
+                        [
+                            {
+                                text: "OPEN FORUM",
+                                web_app: {
+                                    url: webLink,
+                                },
+                            },
+                        ],
+                    ],
+                },
+            }
+        );
+    } catch (error) {
+        // If editing the message fails (e.g., message no longer exists), send a new one
+        await ctx.replyWithPhoto(
+            { url: 'https://www.broscams.io/header.png' },
+            {
+                caption: "*BROSCAMS FORUM*\nSelect an option from the menu below:",
+                parse_mode: "Markdown",
+                reply_markup: {
+                    inline_keyboard: [
+                        [
+                            { text: "ABOUT FORUM", callback_data: "about" },
+                            { text: "SUBSCRIPTIONS", callback_data: "subscriptions" },
+                        ],
+                        [
+                            { text: "CHANNELS", callback_data: "channels" },
+                            { text: "RECENT THREADS", callback_data: "recent" },
+                        ],
+                        [
+                            {
+                                text: "OPEN FORUM",
+                                web_app: {
+                                    url: webLink,
+                                },
+                            },
+                        ],
+                    ],
+                },
+            }
+        );
+    }
 }
 
 // Command to display the main menu
@@ -76,57 +106,73 @@ bot.on('callback_query', async (ctx) => {
             return showMainMenu(ctx);
 
         case 'about':
-            await ctx.replyWithPhoto(
-                headerImage,
+            await ctx.editMessageMedia(
                 {
-                    caption: "*ABOUT FORUM*\n\nThis forum is dedicated to discussions about BROSCAMS.",
+                    type: 'photo',
+                    media: headerImage,
+                    caption: "*ABOUT BROSCAMS*\n\nWe are a dedicated community of crypto degens, running through a forum powered by $BROS.BroScams is a community, dedicated to making money on  the Internet:Through various earning schemes,IT, malware, cracking, security, programming and many more tools.",
                     parse_mode: "Markdown",
-                    reply_markup: mainMenuKeyboard, // Include "Back to Menu" button
+                },
+                {
+                    reply_markup: mainMenuKeyboard,
                 }
             );
             break;
 
         case 'subscriptions':
-            await ctx.replyWithPhoto(
-                headerImage,
+            await ctx.editMessageMedia(
                 {
+                    type: 'photo',
+                    media: headerImage,
                     caption: "*SUBSCRIPTIONS*\n\nHere you can manage your forum subscriptions.",
                     parse_mode: "Markdown",
-                    reply_markup: mainMenuKeyboard, // Include "Back to Menu" button
+                },
+                {
+                    reply_markup: mainMenuKeyboard,
                 }
             );
             break;
 
         case 'channels':
             const channels = await mockApiCall('channels');
-            await ctx.replyWithPhoto(
-                headerImage,
+            await ctx.editMessageMedia(
                 {
+                    type: 'photo',
+                    media: headerImage,
                     caption: `*CHANNELS*\n\nAvailable channels:\n\n${channels.map((ch) => `• ${ch}`).join('\n')}`,
                     parse_mode: "Markdown",
-                    reply_markup: mainMenuKeyboard, // Include "Back to Menu" button
+                },
+                {
+                    reply_markup: mainMenuKeyboard,
                 }
             );
             break;
 
         case 'recent':
             const recentThreads = await mockApiCall('recent');
-            await ctx.replyWithPhoto(
-                headerImage,
+            await ctx.editMessageMedia(
                 {
+                    type: 'photo',
+                    media: headerImage,
                     caption: `*RECENT THREADS*\n\nHere are the most recent threads:\n\n${recentThreads.map((thread) => `• ${thread}`).join('\n')}`,
                     parse_mode: "Markdown",
-                    reply_markup: mainMenuKeyboard, // Include "Back to Menu" button
+                },
+                {
+                    reply_markup: mainMenuKeyboard,
                 }
             );
             break;
 
         default:
-            await ctx.replyWithPhoto(
-                headerImage,
+            await ctx.editMessageMedia(
                 {
+                    type: 'photo',
+                    media: headerImage,
                     caption: "Unknown command. Please try again.",
-                    reply_markup: mainMenuKeyboard, // Include "Back to Menu" button
+                    parse_mode: "Markdown",
+                },
+                {
+                    reply_markup: mainMenuKeyboard,
                 }
             );
     }
