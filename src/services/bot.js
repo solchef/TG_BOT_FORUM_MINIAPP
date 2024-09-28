@@ -16,9 +16,9 @@ bot.use(async (ctx, next) => {
     if (!isRegistered) {
         const result = await registerUserWithTelegram(telegramId, username, firstName, lastName);
         if (result.error) {
-            ctx.reply('There was an issue registering your account.');
+            ctx.reply('There is an temporary technical hitch on our servers. This will be resolve shortly. (+-:');
         } else {
-            ctx.reply('You have been registered successfully!');
+            //ctx.reply('You have been registered successfully!');
         }
     }
 

@@ -58,13 +58,18 @@ export async function registerUserWithTelegram(telegramId, username, firstName, 
         const data = {
             userid: telegramId,
             name: username,
-            imageurl:getRandomImageUrl(),
+            imageurl: getRandomImageUrl(),
             email: `${username}@broscams.io`,
-            firstName:firstName,
-            lastName:lastName
+            firstName: firstName,
+            lastName: lastName
         };
 
-        const response = await apiPost('profile', data); // Adjust 'profile' to your Supabase table name
+        const response = await apiPost('profile', data);
+
+        const profileId = response[0].id;
+        console.log(profileId)
+
+        await addUserToMemberTable(profileId);
 
         if (response.error) {
             throw new Error(response.error);
@@ -87,4 +92,56 @@ export async function isUserRegistered(telegramId) {
     const data = await apiCall('profile', queryParams); // Reuse the apiCall function with parameters
     return data.length > 0; // returns true if the user exists
 }
+
+// Fetch all servers (reusable function)
+export async function getAllServers() {
+    return await apiCall('server'); // Reuse apiCall to fetch servers
+}
+
+// Add user to the member table for each server
+export async function addUserToMemberTable(profileId) {
+    try {
+        const servers = await getAllServers();
+
+        if (servers.length === 0) {
+            console.log('No servers found');
+            return;
+        }
+
+        // Add the user to the member table for each server
+        const responses = await Promise.all(servers.map(async (server) => {
+            const memberData = {
+                profileid: profileId, // Reference to the user profile id
+                serverid: server.id,  // Reference to the server id
+                role: 'GUEST',        // Default role is 'GUEST'
+            };
+
+            return await apiPost('member', memberData); // Reuse apiPost to insert into the member table
+        }));
+
+        return responses;
+    } catch (error) {
+        console.error('Error adding user to member table:', error);
+        return { error: error.message };
+    }
+}
+
+// Function to register a user and add them to the member table for all servers
+// export async function registerAndAddUser(telegramId, username, firstName, lastName) {
+//     // Register the user first
+//     const registeredUser = await registerUserWithTelegram(telegramId, username, firstName, lastName);
+
+//     if (registeredUser.error) {
+//         console.error('User registration failed:', registeredUser.error);
+//         return;
+//     }
+
+//     const profileId = registeredUser[0].id; // Assuming the profile is returned with an ID
+
+//     // Add the user to the member table for all servers
+//     const addedMembers = await addUserToMemberTable(profileId);
+
+//     return addedMembers;
+// }
+
 
