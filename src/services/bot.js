@@ -35,7 +35,6 @@ const mainMenuKeyboard = {
     ],
 };
 
-
 // Function to display the main menu (edit message)
 async function showMainMenu(ctx) {
     const webLink = Config.TELE_BOT_WEB_LINK;
