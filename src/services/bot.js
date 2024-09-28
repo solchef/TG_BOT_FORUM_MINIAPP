@@ -1,22 +1,30 @@
 import { Telegraf } from 'telegraf';
 import { Config } from '../config.js';
+import { getChannels, getRecentMessages, isUserRegistered, registerUserWithTelegram } from '../controller/SupabaseController.js';
 
 const bot = new Telegraf(Config.TELE_BOT_TOKEN);
 
-// const provider = new WalletConnectProvider({
-//     infuraId: "YOUR_INFURA_ID", // Required
-// });
+// Middleware to auto-register the user if not already registered
+bot.use(async (ctx, next) => {
+    // console.log(ctx.from)    
+    const { id: telegramId, username, first_name: firstName, last_name:lastName} = ctx.from;
 
-// bot.command('connect', async (ctx) => {
-//     // Enable session (triggers QR Code modal)
-//     await provider.enable();
+    // Check if the user is already registered
+    const isRegistered = await isUserRegistered(telegramId);
 
-//     // Get the account address
-//     const accounts = await provider.request({ method: "eth_accounts" });
-//     const account = accounts[0];
+    // If not registered, register the user
+    if (!isRegistered) {
+        const result = await registerUserWithTelegram(telegramId, username, firstName, lastName);
+        if (result.error) {
+            ctx.reply('There was an issue registering your account.');
+        } else {
+            ctx.reply('You have been registered successfully!');
+        }
+    }
 
-//     ctx.reply(`Connected to wallet: ${account}`);
-// });
+    // Proceed to the next middleware or command
+    return next();
+});
 
 // Function to generate the inline keyboard with a "Back to Menu" option
 const mainMenuKeyboard = {
@@ -27,15 +35,6 @@ const mainMenuKeyboard = {
     ],
 };
 
-// Mock function to simulate an API call
-async function mockApiCall(endpoint) {
-    if (endpoint === 'channels') {
-        return [];
-    } else if (endpoint === 'recent') {
-        return [];
-    }
-    return [];
-}
 
 // Function to display the main menu (edit message)
 async function showMainMenu(ctx) {
@@ -191,12 +190,18 @@ bot.on('callback_query', async (ctx) => {
             break;
 
         case 'channels':
-            const channels = await mockApiCall('channels');
+            const channels = await getChannels();
+            // console.log(channels)
+            // if (channels.length === 0) {
+            //     ctx.reply('No channels found.');
+            // } else {
+            //     ctx.reply(`Channels: ${channels.map(c => c.name).join(', ')}`);
+            // }
             await ctx.editMessageMedia(
                 {
                     type: 'photo',
                     media: headerImage,
-                    caption: `*CHANNELS*\n\nAvailable channels:\n\n${channels.map((ch) => `• ${ch}`).join('\n')}`,
+                    caption: `*CHANNELS*\n\nAvailable channels:\n\n${channels.map((ch) => `• ${ch.name}`).join('\n')}`,
                     parse_mode: "Markdown",
                 },
                 {
@@ -206,12 +211,14 @@ bot.on('callback_query', async (ctx) => {
             break;
 
         case 'recent':
-            const recentThreads = await mockApiCall('recent');
+            const recentMessages = await getRecentMessages();
+            // console.log(recentMessages)
+
             await ctx.editMessageMedia(
                 {
                     type: 'photo',
                     media: headerImage,
-                    caption: `*RECENT THREADS*\n\nHere are the most recent threads:\n\n${recentThreads.map((thread) => `• ${thread}`).join('\n')}`,
+                    caption: `*RECENT THREADS*\n\nHere are the most recent messages/discussions:\n\n${recentMessages.map((thread) => `• ${thread.content}`).join('\n')}`,
                     parse_mode: "Markdown",
                 },
                 {
@@ -234,8 +241,6 @@ bot.on('callback_query', async (ctx) => {
             );
     }
 });
-
-
 
 // Export the bot instance for use in the main file
 export { bot };

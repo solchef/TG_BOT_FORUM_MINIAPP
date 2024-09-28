@@ -16,8 +16,14 @@ requiredEnvVars.forEach((variable) => {
     }
 });
 
+
 export const Config = {
     TELE_BOT_TOKEN: process.env.TELE_BOT_TOKEN,
     TELE_BOT_WEBHOOK_URL: process.env.TELE_BOT_WEBHOOK_URL, // Replace with your actual domain
-    TELE_BOT_WEB_LINK: process.env.TELE_BOT_WEB_LINK // URL for the mini app
+    TELE_BOT_WEB_LINK: process.env.TELE_BOT_WEB_LINK, // URL for the mini app
+    SUPABASE_API_URL : process.env.SUPABASE_API_URL,
+    SUPABASE_API_KEY : process.env.SUPABASE_API_KEY
 };
+
+
+
