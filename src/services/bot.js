@@ -104,20 +104,33 @@ async function showMainMenu(ctx) {
 }
 
 // Group-specific menu with "About" and "Go to Forum"
-async function sendGroupMenu(ctx) {
-    const webLink = "https://t.me/BroScamsBot"; // Web link for the forum
+// Function to send the group menu to new members with additional inline buttons
+async function sendGroupMenu(member, ctx) {
+    const forumLink = "https://t.me/BroScamsBot"; // Web link for the forum
+    const uniswapLink = "https://uniswap.org"; // Link to Uniswap
+    const twitterLink = "https://twitter.com/broscams"; // Link to $BROS Twitter page
 
     await ctx.replyWithPhoto(
-        { url: 'https://www.broscams.io/header.png' }, // Header image URL
+        { url: 'https://www.broscams.io/header-group.png' }, // Header image URL
         {
-            caption: "*Welcome to the Group!*\n",
+            caption: `*Welcome to the Group, ${member.username}!*\n`,
             parse_mode: "Markdown",
             reply_markup: {
                 inline_keyboard: [
                     [
                         {
+                            text: "BUY $BROS",
+                            url: uniswapLink, // Link to Uniswap
+                        },
+                        {
+                            text: "$BROS TWITTER",
+                            url: twitterLink, // Link to $BROS Twitter
+                        }
+                    ],
+                    [
+                        {
                             text: "GO TO FORUM",
-                            url: webLink, // Add the link for "GO TO FORUM"
+                            url: forumLink, // Add the link for "GO TO FORUM"
                         },
                     ],
                 ],
@@ -126,17 +139,15 @@ async function sendGroupMenu(ctx) {
     );
 }
 
-
-// Trigger when the bot is added to a group
 bot.on('new_chat_members', async (ctx) => {
     const newMembers = ctx.message.new_chat_members;
-    const isBotAdded = newMembers.some((member) => member.id === ctx.botInfo.id);
 
-    if (isBotAdded) {
-        // Send the group-specific menu with inline buttons
-        await sendGroupMenu(ctx);
+    for (const member of newMembers) {
+        // Call the sendGroupMenu function to send the custom welcome message
+        await sendGroupMenu(member,ctx);
     }
 });
+
 
 bot.command('start_group_welcome', (ctx) => {
     sendGroupMenu(ctx);
