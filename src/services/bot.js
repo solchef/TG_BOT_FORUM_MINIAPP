@@ -44,7 +44,7 @@ async function showMainMenu(ctx) {
         await ctx.editMessageMedia(
             {
                 type: 'photo',
-                media: { url: 'https://www.broscams.io/header.png' }, // Header image URL
+                media: { url: 'https://wepqmlljzvxjrytnhlhi.supabase.co/storage/v1/object/public/broscams/header.png' }, // Header image URL
                 caption: "Select an option from the menu below:",
                 parse_mode: "Markdown",
             },
@@ -74,7 +74,7 @@ async function showMainMenu(ctx) {
     } catch (error) {
         // If editing the message fails (e.g., message no longer exists), send a new one
         await ctx.replyWithPhoto(
-            { url: 'https://www.broscams.io/header.png' },
+            { url: 'https://wepqmlljzvxjrytnhlhi.supabase.co/storage/v1/object/public/broscams/header.png' },
             {
                 caption: "*BROSCAMS FORUM*\nSelect an option from the menu below:",
                 parse_mode: "Markdown",
@@ -111,7 +111,7 @@ async function sendGroupMenu(member, ctx) {
     const twitterLink = "https://twitter.com/broscams"; // Link to $BROS Twitter page
 
     await ctx.replyWithPhoto(
-        { url: 'https://www.broscams.io/header-group.png' }, // Header image URL
+        { url: 'https://wepqmlljzvxjrytnhlhi.supabase.co/storage/v1/object/public/broscams/header-group.png' }, // Header image URL
         {
             caption: `*Welcome to the Group, ${member.username}!*\n`,
             parse_mode: "Markdown",
@@ -164,7 +164,7 @@ bot.on('callback_query', async (ctx) => {
     const callbackData = ctx.callbackQuery?.data;
 
     // Include the header image in all replies
-    const headerImage = { url: 'https://www.broscams.io/header.png' }; // Replace with your header image URL
+    const headerImage = { url: 'https://wepqmlljzvxjrytnhlhi.supabase.co/storage/v1/object/public/broscams/header.png' }; // Replace with your header image URL
 
     switch (callbackData) {
         case 'menu':
