@@ -16,7 +16,8 @@ bot.use(async (ctx, next) => {
     if (!isRegistered) {
         const result = await registerUserWithTelegram(telegramId, username, firstName, lastName);
         if (result.error) {
-            ctx.reply('There is an temporary technical hitch on our servers. This will be resolve shortly. (+-:');
+            // ctx.reply('There is an temporary technical hitch on our servers. This will be resolve shortly. (+-:');
+            console.log(result.error)
         } else {
             //ctx.reply('You have been registered successfully!');
         }
@@ -109,11 +110,12 @@ async function sendGroupMenu(member, ctx) {
     const forumLink = "https://t.me/BroScamsBot"; // Web link for the forum
     const uniswapLink = "https://broscams.io"; // Link to Uniswap
     const twitterLink = "https://twitter.com/broscams"; // Link to $BROS Twitter page
+    let newMember = member.username || member.first_name;
 
     await ctx.replyWithPhoto(
         { url: 'https://wepqmlljzvxjrytnhlhi.supabase.co/storage/v1/object/public/broscams/header-group.png' }, // Header image URL
         {
-            caption: `*Welcome to the Group, ${member.username}!*\n`,
+            caption: `*Welcome to the Group, ${newMember}!*\n`,
             parse_mode: "Markdown",
             reply_markup: {
                 inline_keyboard: [
