@@ -98,6 +98,10 @@ export async function getAllServers() {
     return await apiCall('server'); // Reuse apiCall to fetch servers
 }
 
+export async function getAllTelegramIds(){
+    return await apiCall('profile');
+}
+
 // Add user to the member table for each server
 export async function addUserToMemberTable(profileId) {
     try {

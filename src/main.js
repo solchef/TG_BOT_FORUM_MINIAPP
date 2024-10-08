@@ -2,6 +2,8 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import { bot } from './services/bot.js';
 import { Config } from './config.js';
+import { startSupabaseSubscriptions } from './controller/EventsSubscriptionsController.js';
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -27,4 +29,5 @@ bot.telegram.setWebhook(`${Config.TELE_BOT_WEBHOOK_URL}/telegram-webhook`)
 // Start the Express server
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
+    startSupabaseSubscriptions();
 });

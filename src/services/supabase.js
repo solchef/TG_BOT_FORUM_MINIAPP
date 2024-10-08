@@ -1,3 +1,4 @@
+import { createClient } from "@supabase/supabase-js";
 import { Config } from "../config.js";
 import axios from 'axios'
 
@@ -11,3 +12,7 @@ const api = axios.create({
   });
   
 export const supabaseApi = api;
+
+const supabaseClient = createClient(Config.SUPABASE_API_URL, Config.SUPABASE_API_KEY);
+
+export const supabase = supabaseClient;
