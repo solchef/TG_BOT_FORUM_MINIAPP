@@ -1,13 +1,15 @@
-import { Telegraf } from 'telegraf';
+import { Telegraf, session } from 'telegraf';
 import { Config } from '../config.js';
 import { getChannels, getRecentMessages, isUserRegistered, registerUserWithTelegram } from '../controller/SupabaseController.js';
+import { supabase } from './supabase.js';
 
 const bot = new Telegraf(Config.TELE_BOT_TOKEN);
+bot.use(session());
 
 // Middleware to auto-register the user if not already registered
 bot.use(async (ctx, next) => {
     // console.log(ctx.from)    
-    const { id: telegramId, username, first_name: firstName, last_name:lastName} = ctx.from;
+    const { id: telegramId, username, first_name: firstName, last_name: lastName } = ctx.from;
 
     // Check if the user is already registered
     const isRegistered = await isUserRegistered(telegramId);
@@ -28,7 +30,7 @@ bot.use(async (ctx, next) => {
 });
 
 // Function to generate the inline keyboard with a "Back to Menu" option
-const mainMenuKeyboard = {
+export const mainMenuKeyboard = {
     inline_keyboard: [
         [
             { text: "BACK TO MENU", callback_data: "menu" },
@@ -36,77 +38,158 @@ const mainMenuKeyboard = {
     ],
 };
 
+const deleteMenuMessage = async (telegramId, messageId) => {
+    try {
+        await bot.telegram.deleteMessage(telegramId, messageId);
+        console.log(`Message with ID ${messageId} deleted for user ${telegramId}.`);
+    } catch (error) {
+        console.error(`Error deleting message ID ${messageId} for Telegram ID ${telegramId}:`, error);
+    }
+};
+
+
+const updateOrDeleteMenuMessage = async (telegramId, lastMenuMessageId, newContent, mainMenuKeyboard) => {
+    try {
+        // First, try to delete the old menu message if needed
+        if (lastMenuMessageId) {
+            await deleteMenuMessage(telegramId, lastMenuMessageId);
+        }
+
+        // Then send the new message
+        const sentMessage = await bot.telegram.sendMessage(telegramId, `New content: ${newContent}`, {
+            reply_markup: mainMenuKeyboard,
+            parse_mode: "Markdown",
+        });
+        
+        // Save the new message ID
+        lastMenuMessageId = sentMessage.message_id;
+
+    } catch (error) {
+        console.error(`Error updating/deleting message for Telegram ID ${telegramId}:`, error);
+    }
+};
+
 // Function to display the main menu (edit message)
-async function showMainMenu(ctx) {
+export async function showMainMenu(ctx) {
+
     const webLink = Config.TELE_BOT_WEB_LINK;
 
+    const userId = ctx.from.id.toString(); 
+
+    const { data: userMessages, error } = await supabase
+        .from('telegramusermessages')
+        .select('messageids, lastmessageid')
+        .eq('tid', userId)
+        .single();
+
+    if (error) {
+        console.error('Error fetching user messages:', error.message);
+        // return;
+    }
+
+    let messageIds = userMessages?.messageids || [];
+    let lastMessageId = userMessages?.lastmessageid || null;
+    console.log(lastMessageId)
+
+    // Delete all tracked non-menu messages
+    for (const messageId of messageIds) {
+        try {
+            await ctx.deleteMessage(messageId);
+        } catch (error) {
+            console.warn(`Failed to delete message ID ${messageId}:`, error.message);
+        }
+    }
+
+    // Clear the messageIds array since they've been deleted
+    messageIds = [];
+
     try {
-        // Use editMessageMedia to update the photo and caption
-        await ctx.editMessageMedia(
-            {
-                type: 'photo',
-                media: { url: 'https://wepqmlljzvxjrytnhlhi.supabase.co/storage/v1/object/public/broscams/header.png' }, // Header image URL
-                caption: "Select an option from the menu below:",
-                parse_mode: "Markdown",
-            },
-            {
-                reply_markup: {
-                    inline_keyboard: [
-                        [
-                            { text: "ABOUT FORUM", callback_data: "about" },
-                            { text: "SUBSCRIPTIONS", callback_data: "subscriptions" },
-                        ],
-                        [
-                            { text: "CHANNELS", callback_data: "channels" },
-                            { text: "RECENT THREADS", callback_data: "recent" },
-                        ],
-                        [
-                            {
-                                text: "OPEN FORUM",
-                                web_app: {
-                                    url: webLink,
-                                },
-                            },
-                        ],
-                    ],
+        let updatedMessage;
+        // If lastMessageId exists, try to edit the menu message
+        if (lastMessageId) {
+            updatedMessage = await ctx.telegram.editMessageMedia(
+                ctx.chat.id,
+                lastMessageId,
+                null,
+                {
+                    type: 'photo',
+                    media: { url: 'https://wepqmlljzvxjrytnhlhi.supabase.co/storage/v1/object/public/broscams/header.png' },
+                    caption: "Select an option from the menu below:",
+                    parse_mode: "Markdown",
                 },
-            }
-        );
+                {
+                    reply_markup: {
+                        inline_keyboard: [
+                            [
+                                { text: "ABOUT FORUM", callback_data: "about" },
+                                { text: "SUBSCRIPTIONS", callback_data: "subscriptions" },
+                            ],
+                            [
+                                { text: "CHANNELS", callback_data: "channels" },
+                                { text: "RECENT THREADS", callback_data: "recent" },
+                            ],
+                            [
+                                {
+                                    text: "OPEN FORUM",
+                                    web_app: {
+                                        url: webLink,
+                                    },
+                                },
+                            ],
+                        ],
+                    },
+                }
+            );
+        } else {
+            // If no lastMessageId, send a new menu message
+            updatedMessage = await ctx.replyWithPhoto(
+                { url: 'https://wepqmlljzvxjrytnhlhi.supabase.co/storage/v1/object/public/broscams/header.png' },
+                {
+                    caption: "*BROSCAMS FORUM*\nSelect an option from the menu below:",
+                    parse_mode: "Markdown",
+                    reply_markup: {
+                        inline_keyboard: [
+                            [
+                                { text: "ABOUT FORUM", callback_data: "about" },
+                                { text: "SUBSCRIPTIONS", callback_data: "subscriptions" },
+                            ],
+                            [
+                                { text: "CHANNELS", callback_data: "channels" },
+                                { text: "RECENT THREADS", callback_data: "recent" },
+                            ],
+                            [
+                                {
+                                    text: "OPEN FORUM",
+                                    web_app: {
+                                        url: webLink,
+                                    },
+                                },
+                            ],
+                        ],
+                    },
+                }
+            );
+        }
+
+        const { error: updateError } = await supabase
+            .from('telegramusermessages')
+            .update({
+                messageids: messageIds,
+                lastmessageid: updatedMessage.message_id,
+            })
+            .eq('tid', userId);
+
+        if (updateError) {
+            console.error('Error updating message records:', updateError.message);
+        }
     } catch (error) {
-        // If editing the message fails (e.g., message no longer exists), send a new one
-        await ctx.replyWithPhoto(
-            { url: 'https://wepqmlljzvxjrytnhlhi.supabase.co/storage/v1/object/public/broscams/header.png' },
-            {
-                caption: "*BROSCAMS FORUM*\nSelect an option from the menu below:",
-                parse_mode: "Markdown",
-                reply_markup: {
-                    inline_keyboard: [
-                        [
-                            { text: "ABOUT FORUM", callback_data: "about" },
-                            { text: "SUBSCRIPTIONS", callback_data: "subscriptions" },
-                        ],
-                        [
-                            { text: "CHANNELS", callback_data: "channels" },
-                            { text: "RECENT THREADS", callback_data: "recent" },
-                        ],
-                        [
-                            {
-                                text: "OPEN FORUM",
-                                web_app: {
-                                    url: webLink,
-                                },
-                            },
-                        ],
-                    ],
-                },
-            }
-        );
+        console.error("Failed to send or edit menu message:", error.message);
     }
 }
 
 // Group-specific menu with "About" and "Go to Forum"
 // Function to send the group menu to new members with additional inline buttons
-async function sendGroupMenu(member, ctx) {
+export async function sendGroupMenu(member, ctx) {
     const forumLink = "https://t.me/BroScamsBot"; // Web link for the forum
     const uniswapLink = "https://broscams.io"; // Link to Uniswap
     const twitterLink = "https://twitter.com/broscams"; // Link to $BROS Twitter page
@@ -146,7 +229,7 @@ bot.on('new_chat_members', async (ctx) => {
 
     for (const member of newMembers) {
         // Call the sendGroupMenu function to send the custom welcome message
-        await sendGroupMenu(member,ctx);
+        await sendGroupMenu(member, ctx);
     }
 });
 
@@ -225,7 +308,6 @@ bot.on('callback_query', async (ctx) => {
         case 'recent':
             const recentMessages = await getRecentMessages();
             // console.log(recentMessages)
-
             await ctx.editMessageMedia(
                 {
                     type: 'photo',

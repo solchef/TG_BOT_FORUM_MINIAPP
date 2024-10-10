@@ -67,7 +67,7 @@ export async function registerUserWithTelegram(telegramId, username, firstName, 
         const response = await apiPost('profile', data);
 
         const profileId = response[0].id;
-        console.log(profileId)
+        // console.log(profileId)
 
         await addUserToMemberTable(profileId);
 
