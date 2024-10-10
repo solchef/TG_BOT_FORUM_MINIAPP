@@ -196,7 +196,7 @@ export async function sendGroupMenu(member, ctx) {
     let newMember = member.username || member.first_name;
 
     await ctx.replyWithPhoto(
-        { url: 'https://wepqmlljzvxjrytnhlhi.supabase.co/storage/v1/object/public/broscams/header-group.png' }, // Header image URL
+        { url: 'https://wepqmlljzvxjrytnhlhi.supabase.co/storage/v1/object/public/broscams/header.png' }, 
         {
             caption: `*Welcome to the Group, ${newMember}!*\n`,
             parse_mode: "Markdown",
