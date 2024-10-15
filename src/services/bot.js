@@ -106,41 +106,41 @@ export async function showMainMenu(ctx) {
     try {
         let updatedMessage;
         // If lastMessageId exists, try to edit the menu message
-        if (lastMessageId) {
-            updatedMessage = await ctx.telegram.editMessageMedia(
-                ctx.chat.id,
-                lastMessageId,
-                null,
-                {
-                    type: 'photo',
-                    media: { url: 'https://wepqmlljzvxjrytnhlhi.supabase.co/storage/v1/object/public/broscams/header.png' },
-                    caption: "Select an option from the menu below:",
-                    parse_mode: "Markdown",
-                },
-                {
-                    reply_markup: {
-                        inline_keyboard: [
-                            [
-                                { text: "ABOUT FORUM", callback_data: "about" },
-                                { text: "SUBSCRIPTIONS", callback_data: "subscriptions" },
-                            ],
-                            [
-                                { text: "CHANNELS", callback_data: "channels" },
-                                { text: "RECENT THREADS", callback_data: "recent" },
-                            ],
-                            [
-                                {
-                                    text: "OPEN FORUM",
-                                    web_app: {
-                                        url: webLink,
-                                    },
-                                },
-                            ],
-                        ],
-                    },
-                }
-            );
-        } else {
+        // if (lastMessageId) {
+        //     updatedMessage = await ctx.telegram.editMessageMedia(
+        //         ctx.chat.id,
+        //         lastMessageId,
+        //         null,
+        //         {
+        //             type: 'photo',
+        //             media: { url: 'https://wepqmlljzvxjrytnhlhi.supabase.co/storage/v1/object/public/broscams/header.png' },
+        //             caption: "Select an option from the menu below:",
+        //             parse_mode: "Markdown",
+        //         },
+        //         {
+        //             reply_markup: {
+        //                 inline_keyboard: [
+        //                     [
+        //                         { text: "ABOUT FORUM", callback_data: "about" },
+        //                         { text: "SUBSCRIPTIONS", callback_data: "subscriptions" },
+        //                     ],
+        //                     [
+        //                         { text: "CHANNELS", callback_data: "channels" },
+        //                         { text: "RECENT THREADS", callback_data: "recent" },
+        //                     ],
+        //                     [
+        //                         {
+        //                             text: "OPEN FORUM",
+        //                             web_app: {
+        //                                 url: webLink,
+        //                             },
+        //                         },
+        //                     ],
+        //                 ],
+        //             },
+        //         }
+        //     );
+        // } else {
             // If no lastMessageId, send a new menu message
             updatedMessage = await ctx.replyWithPhoto(
                 { url: 'https://wepqmlljzvxjrytnhlhi.supabase.co/storage/v1/object/public/broscams/header.png' },
@@ -169,7 +169,7 @@ export async function showMainMenu(ctx) {
                     },
                 }
             );
-        }
+        // }
 
         const { error: updateError } = await supabase
             .from('telegramusermessages')
