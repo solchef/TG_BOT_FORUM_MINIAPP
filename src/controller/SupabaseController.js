@@ -57,7 +57,7 @@ export async function registerUserWithTelegram(telegramId, username, firstName, 
     try {
         const data = {
             userid: telegramId,
-            name: username,
+            name: username || firstName,
             imageurl: getRandomImageUrl(),
             email: `${username}@broscams.io`,
             firstName: firstName,
@@ -66,13 +66,18 @@ export async function registerUserWithTelegram(telegramId, username, firstName, 
 
         const response = await apiPost('profile', data);
 
+
+        if(response){
         const profileId = response[0].id;
-        // console.log(profileId)
+        console.log(profileId)
+        
 
         await addUserToMemberTable(profileId);
+        }
 
         if (response.error) {
-            throw new Error(response.error);
+            // throw new Error(response.error);
+            console.log(error)
         }
         return response;
     } catch (error) {
