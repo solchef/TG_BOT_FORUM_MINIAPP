@@ -193,6 +193,7 @@ export async function sendGroupMenu(member, ctx) {
     const forumLink = "https://t.me/BroScamsBot"; // Web link for the forum
     const uniswapLink = "https://app.uniswap.org/swap?chain=mainnet&inputCurrency=NATIVE&outputCurrency=0x79ff0f87eb6d8773f7d9c78e6b15bb74adad11cf"; // Link to Uniswap
     const twitterLink = "https://twitter.com/broscams"; // Link to $BROS Twitter page
+    const dextoolsLink = "https://www.dextools.io/app/en/ether/pair-explorer/0xdbcf76aa8a1869c6665ce7f8e8bfbe2f3ca91465"
     let newMember = member.username || member.first_name;
 
     await ctx.replyWithPhoto(
@@ -204,12 +205,12 @@ export async function sendGroupMenu(member, ctx) {
                 inline_keyboard: [
                     [
                         {
-                            text: "Buy $BROS",
+                            text: "BUY $BROS",
                             url: uniswapLink, // Link to Uniswap
                         },
                         {
-                            text: "$BROS TWITTER",
-                            url: twitterLink, // Link to $BROS Twitter
+                            text: "DEXTOOLS",
+                            url: dextoolsLink, // Link to $BROS Twitter
                         }
                     ],
                     [
