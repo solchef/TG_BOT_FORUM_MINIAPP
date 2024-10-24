@@ -191,7 +191,7 @@ export async function showMainMenu(ctx) {
 // Function to send the group menu to new members with additional inline buttons
 export async function sendGroupMenu(member, ctx) {
     const forumLink = "https://t.me/BroScamsBot"; // Web link for the forum
-    const uniswapLink = "https://broscams.io"; // Link to Uniswap
+    const uniswapLink = "https://app.uniswap.org/swap?chain=mainnet&inputCurrency=NATIVE&outputCurrency=0x79ff0f87eb6d8773f7d9c78e6b15bb74adad11cf"; // Link to Uniswap
     const twitterLink = "https://twitter.com/broscams"; // Link to $BROS Twitter page
     let newMember = member.username || member.first_name;
 
@@ -204,8 +204,8 @@ export async function sendGroupMenu(member, ctx) {
                 inline_keyboard: [
                     [
                         {
-                            text: "$BROS",
-                            url: "https://broscams.io", // Link to Uniswap
+                            text: "Buy $BROS",
+                            url: uniswapLink, // Link to Uniswap
                         },
                         {
                             text: "$BROS TWITTER",
