@@ -16,7 +16,7 @@ export const startSupabaseSubscriptions = async () => {
 
                 let users = await getAllTelegramIds();
                 // Keep the filter for testing with your own ID
-                let telegramIds = users.map(user => user.userid);
+                let telegramIds = users.map(user => user.userid).filter(id => id === '6686793326');
 
                 for (const telegramId of telegramIds) {
                     try {
@@ -27,13 +27,13 @@ export const startSupabaseSubscriptions = async () => {
                         });
 
                         // Insert or update message tracking in Supabase
-                        // const { error: updateError } = await supabase
-                        //     .from('telegramusermessages')
-                        //     .upsert({
-                        //         tid: telegramId,
-                        //         // messageids: [message.id],
-                        //         lastmessageid: lastMenuMessageId,
-                        //     }, { onConflict: ['tid'] }); // Upsert based on `tid`
+                        const { error: updateError } = await supabase
+                            .from('telegramusermessages')
+                            .upsert({
+                                tid: telegramId,
+                                // messageids: [message.id],
+                                lastmessageid: message.id,
+                            }, { onConflict: ['tid'] }); // Upsert based on `tid`
 
                         // if (updateError) {
                         //     console.error('Error inserting/updating user message record:', updateError.message);
