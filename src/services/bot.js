@@ -4,6 +4,12 @@ import { getChannels, getRecentMessages, isUserRegistered, registerUserWithTeleg
 import { supabase } from './supabase.js';
 
 const bot = new Telegraf(Config.TELE_BOT_TOKEN);
+const forumLink = "https://t.me/BroScamsBot"; // Web link for the forum
+const uniswapLink = "https://app.uniswap.org/swap?chain=mainnet&inputCurrency=NATIVE&outputCurrency=0x79ff0f87eb6d8773f7d9c78e6b15bb74adad11cf"; // Link to Uniswap
+const twitterLink = "https://twitter.com/broscams"; // Link to $BROS Twitter page
+const dextoolsLink = "https://www.dextools.io/app/en/ether/pair-explorer/0xdbcf76aa8a1869c6665ce7f8e8bfbe2f3ca91465"
+const webLink = Config.TELE_BOT_WEB_LINK;
+
 bot.use(session());
 
 // Middleware to auto-register the user if not already registered
@@ -13,6 +19,8 @@ bot.use(async (ctx, next) => {
 
     // Check if the user is already registered
     const isRegistered = await isUserRegistered(telegramId);
+
+    console.log(isRegistered);
 
     // If not registered, register the user
     if (!isRegistered) {
@@ -31,11 +39,25 @@ bot.use(async (ctx, next) => {
 
 // Function to generate the inline keyboard with a "Back to Menu" option
 export const mainMenuKeyboard = {
+
     inline_keyboard: [
+        [
+            {
+                text: "BUY $BROS",
+                url: uniswapLink,
+            },
+            {
+                text: "OPEN FORUM",
+                web_app: {
+                    url: webLink,
+                },
+            },
+
+        ],
         [
             { text: "BACK TO MENU", callback_data: "menu" },
         ],
-    ],
+    ]
 };
 
 const deleteMenuMessage = async (telegramId, messageId) => {
@@ -60,7 +82,7 @@ const updateOrDeleteMenuMessage = async (telegramId, lastMenuMessageId, newConte
             reply_markup: mainMenuKeyboard,
             parse_mode: "Markdown",
         });
-        
+
         // Save the new message ID
         lastMenuMessageId = sentMessage.message_id;
 
@@ -72,9 +94,8 @@ const updateOrDeleteMenuMessage = async (telegramId, lastMenuMessageId, newConte
 // Function to display the main menu (edit message)
 export async function showMainMenu(ctx) {
 
-    const webLink = Config.TELE_BOT_WEB_LINK;
 
-    const userId = ctx.from.id.toString(); 
+    const userId = ctx.from.id.toString();
 
     const { data: userMessages, error } = await supabase
         .from('telegramusermessages')
@@ -141,34 +162,34 @@ export async function showMainMenu(ctx) {
         //         }
         //     );
         // } else {
-            // If no lastMessageId, send a new menu message
-            updatedMessage = await ctx.replyWithPhoto(
-                { url: 'https://wepqmlljzvxjrytnhlhi.supabase.co/storage/v1/object/public/broscams/header.png' },
-                {
-                    caption: "*BROSCAMS FORUM*\nSelect an option from the menu below:",
-                    parse_mode: "Markdown",
-                    reply_markup: {
-                        inline_keyboard: [
-                            [
-                                { text: "ABOUT FORUM", callback_data: "about" },
-                                { text: "SUBSCRIPTIONS", callback_data: "subscriptions" },
-                            ],
-                            [
-                                { text: "CHANNELS", callback_data: "channels" },
-                                { text: "RECENT THREADS", callback_data: "recent" },
-                            ],
-                            [
-                                {
-                                    text: "OPEN FORUM",
-                                    web_app: {
-                                        url: webLink,
-                                    },
-                                },
-                            ],
+        // If no lastMessageId, send a new menu message
+        updatedMessage = await ctx.replyWithPhoto(
+            { url: 'https://wepqmlljzvxjrytnhlhi.supabase.co/storage/v1/object/public/broscams/header.png' },
+            {
+                caption: "*BROSCAMS FORUM*\nSelect an option from the menu below:",
+                parse_mode: "Markdown",
+                reply_markup: {
+                    inline_keyboard: [
+                        [
+                            { text: "ABOUT FORUM", callback_data: "about" },
+                            { text: "SUBSCRIPTIONS", callback_data: "subscriptions" },
                         ],
-                    },
-                }
-            );
+                        [
+                            { text: "CHANNELS", callback_data: "channels" },
+                            { text: "RECENT THREADS", callback_data: "recent" },
+                        ],
+                        [
+                            {
+                                text: "OPEN FORUM",
+                                web_app: {
+                                    url: webLink,
+                                },
+                            },
+                        ],
+                    ],
+                },
+            }
+        );
         // }
 
         const { error: updateError } = await supabase
@@ -190,14 +211,10 @@ export async function showMainMenu(ctx) {
 // Group-specific menu with "About" and "Go to Forum"
 // Function to send the group menu to new members with additional inline buttons
 export async function sendGroupMenu(member, ctx) {
-    const forumLink = "https://t.me/BroScamsBot"; // Web link for the forum
-    const uniswapLink = "https://app.uniswap.org/swap?chain=mainnet&inputCurrency=NATIVE&outputCurrency=0x79ff0f87eb6d8773f7d9c78e6b15bb74adad11cf"; // Link to Uniswap
-    const twitterLink = "https://twitter.com/broscams"; // Link to $BROS Twitter page
-    const dextoolsLink = "https://www.dextools.io/app/en/ether/pair-explorer/0xdbcf76aa8a1869c6665ce7f8e8bfbe2f3ca91465"
     let newMember = member.username || member.first_name;
 
     await ctx.replyWithPhoto(
-        { url: 'https://wepqmlljzvxjrytnhlhi.supabase.co/storage/v1/object/public/broscams/header.png' }, 
+        { url: 'https://wepqmlljzvxjrytnhlhi.supabase.co/storage/v1/object/public/broscams/header.png' },
         {
             caption: `*Welcome to the Group, ${newMember}!*\n`,
             parse_mode: "Markdown",

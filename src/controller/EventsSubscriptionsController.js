@@ -21,23 +21,23 @@ export const startSupabaseSubscriptions = async () => {
                 for (const telegramId of telegramIds) {
                     try {
 
-                        let message = await bot.telegram.sendMessage(telegramId, `New content: ${newContent}`, {
+                        let message = await bot.telegram.sendMessage(telegramId, `New Forum Message/Content: \n ${newContent}`, {
                             reply_markup: mainMenuKeyboard,
                             parse_mode: "Markdown",
                         });
 
                         // Insert or update message tracking in Supabase
-                        const { error: updateError } = await supabase
-                            .from('telegramusermessages')
-                            .upsert({
-                                tid: telegramId,
-                                // messageids: [message.id],
-                                lastmessageid: lastMenuMessageId,
-                            }, { onConflict: ['tid'] }); // Upsert based on `tid`
+                        // const { error: updateError } = await supabase
+                        //     .from('telegramusermessages')
+                        //     .upsert({
+                        //         tid: telegramId,
+                        //         // messageids: [message.id],
+                        //         lastmessageid: lastMenuMessageId,
+                        //     }, { onConflict: ['tid'] }); // Upsert based on `tid`
 
-                        if (updateError) {
-                            console.error('Error inserting/updating user message record:', updateError.message);
-                        }
+                        // if (updateError) {
+                        //     console.error('Error inserting/updating user message record:', updateError.message);
+                        // }
 
                     } catch (error) {
                         console.error(`Error sending/editing message to Telegram ID ${telegramId}:`, error);

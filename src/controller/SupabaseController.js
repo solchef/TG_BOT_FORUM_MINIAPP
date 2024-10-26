@@ -69,19 +69,17 @@ export async function registerUserWithTelegram(telegramId, username, firstName, 
 
         if(response){
         const profileId = response[0].id;
-        console.log(profileId)
-        
-
+        // console.log(profileId)
         await addUserToMemberTable(profileId);
         }
 
         if (response.error) {
             // throw new Error(response.error);
-            console.log(error)
+            console.log("An error occerred")
         }
         return response;
     } catch (error) {
-        console.error('Error registering user with Telegram:', error);
+        console.error('Error registering user with Telegram:');
         return { error: error.message };
     }
 }
