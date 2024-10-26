@@ -16,12 +16,12 @@ export const startSupabaseSubscriptions = async () => {
 
                 let users = await getAllTelegramIds();
                 // Keep the filter for testing with your own ID
-                let telegramIds = users.map(user => user.userid).filter(id => id === '6686793326');
+                let telegramIds = users.map(user => user.userid);
 
                 for (const telegramId of telegramIds) {
                     try {
 
-                        let message = await bot.telegram.sendMessage(telegramId, `New Forum Message/Content: \n ${newContent}`, {
+                        let message = await bot.telegram.sendMessage(telegramId, `New Forum Message/Content: \n\n ${newContent}`, {
                             reply_markup: mainMenuKeyboard,
                             parse_mode: "Markdown",
                         });
